@@ -309,6 +309,7 @@ for linha in arquivo:
                 tokens.append(token)
                 i += 1
                 estado = 0
+                lexema = []
             else:
                 lexema.append(char)
                 i += 1
