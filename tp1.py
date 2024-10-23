@@ -101,11 +101,24 @@ for linha in arquivo:
             elif char in string.digits:
                 inicio = i
                 lexema.append(char)
-                estado = 6
+                if i+1 == len(ibuf):
+                    palavra = ''.join(lexema)
+                    tipo = Tipo("INT_CONST", int(palavra))
+                    token = Token(inicio, i, num_linha, tipo)
+                    tokens.append(token)
+                    lexema = []
+                else:
+                    estado = 6
             elif char in string.ascii_letters:
                 inicio = i
                 lexema.append(char)
-                estado = 9   
+                if i+1 == len(ibuf):
+                    tipo = Tipo("IDENTIFICADOR", ''.join(lexema))
+                    token = Token(inicio, i+1, num_linha, tipo)
+                    tokens.append(token)
+                    lexema = [] 
+                else:
+                    estado = 9   
             elif char == "'":
                 inicio = i
                 estado = 10
@@ -182,6 +195,8 @@ for linha in arquivo:
             elif char in string.digits:
                 lexema.append(char)
                 i += 1
+                if i == len(ibuf):
+                    ibuf = ibuf + " "
             else:
                 palavra = ''.join(lexema)
                 tipo = Tipo("INT_CONST", int(palavra))
@@ -202,6 +217,8 @@ for linha in arquivo:
             elif char in string.digits:
                 lexema.append(char)
                 i += 1
+                if i == len(ibuf):
+                    ibuf = ibuf + " "
             else:
                 palavra = ''.join(lexema)
                 tipo = Tipo("FLOAT_CONST", float(palavra))
@@ -212,8 +229,10 @@ for linha in arquivo:
 
         elif estado == 9:
             if char in string.digits or char in string.ascii_letters or char == '_':
-                    lexema.append(char)
-                    i += 1
+                lexema.append(char) 
+                i += 1
+                if i == len(ibuf):
+                    ibuf = ibuf + " "
             else:               
                 palavra = ''.join(lexema)
                 if palavra == "fn":
@@ -247,29 +266,53 @@ for linha in arquivo:
                 
         
         elif estado == 10:
-            lexema.append(char)
-            print(i)
             i += 1
-            estado = 11
+            if char == "'":
+                tipo = Tipo("CARACTER_LITERAL", '')
+                token = Token(inicio, i, num_linha, tipo)
+                tokens.append(token)
+                i += 1
+                estado = 0
+            else:
+                lexema.append(char)
+                estado = 11
 
         elif estado == 11:
             if char == "'":
                 tipo = Tipo("CARACTER_LITERAL", ''.join(lexema))
                 token = Token(inicio, i, num_linha, tipo)
                 tokens.append(token)
+                i += 1
                 estado = 0
+                lexema = []
             else:
                 sys.exit("Erro: Esperado apenas um elemento dentro das aspas simples")
 
         
         elif estado == 12:
-            estado = 13
+            lexema.append(char)
+            i += 1
+            if char == '"':
+                tipo = Tipo("FMT_STRING", "")
+                token = Token(inicio, i, num_linha, tipo)
+                tokens.append(token)
+                i += 1
+                estado = 0
+                lexema = []
+            else:
+                estado = 13
 
         elif estado == 13:
-            if char == "'":
-                token = [char, "FMT_STRING", num_linha]
+            if char == '"':
+                tipo = Tipo("FMT_STRING", ''.join(lexema))
+                token = Token(inicio, i, num_linha, tipo)
                 tokens.append(token)
+                i += 1
                 estado = 0
+            else:
+                lexema.append(char)
+                i += 1
+
         
 with open('tokens.json', 'w') as arquivo_json:
     json.dump([token.para_dict() for token in tokens], arquivo_json, indent=4)
