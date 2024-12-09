@@ -2,12 +2,15 @@ import sys
 import string
 import json
 
+if len(sys.argv) != 2:
+    print("Entrada errada! Por favor digite o nome do arquivo e depois a entrada")
+    sys.exit()
 
-arquivo = open("entrada.txt", 'r') 
+nome_arquivo = sys.argv[1]
+arquivo = open(nome_arquivo, 'r') 
 estado = 0 
 lexema = [] 
 tokens = [] 
-
 
 class Tipo:
     def __init__(self, tipo, token):
@@ -35,56 +38,56 @@ class Token:
         }
 
 
-num_linha = 1
+num_linha = -1
 for linha in arquivo: 
+    num_linha += 1
     ibuf = linha.rstrip('\n')
     i = 0
     #print(linha)
 
     while i < len(ibuf): 
         char = ibuf[i]
-
         if estado == 0:
             # Especiais
             if char == '(':
                 tipo = Tipo("PONTUACAO", "LBRACKET")
-                token = Token(i, i+1, num_linha, tipo)
+                token = Token(i, i+1, num_linha + 1, tipo)
                 tokens.append(token)
             elif char == ')':
                 tipo = Tipo("PONTUACAO", "RBRACKET")
-                token = Token(i, i+1, num_linha, tipo)
+                token = Token(i, i+1, num_linha + 1, tipo)
                 tokens.append(token)
             elif char == ':':
                 tipo = Tipo("PONTUACAO", "COLON")
-                token = Token(i, i+1, num_linha, tipo)
+                token = Token(i, i+1, num_linha + 1, tipo)
                 tokens.append(token)
             elif char == ',':
                 tipo = Tipo("PONTUACAO", "COMMA")
-                token = Token(i, i+1, num_linha, tipo)
+                token = Token(i, i+1, num_linha + 1, tipo)
                 tokens.append(token)
             elif char == '{':
                 tipo = Tipo("PONTUACAO", "LBRACE")
-                token = Token(i, i+1, num_linha, tipo)
+                token = Token(i, i+1, num_linha + 1, tipo)
                 tokens.append(token)
             elif char == '}':
                 tipo = Tipo("PONTUACAO", "RBRACE")
-                token = Token(i, i+1, num_linha, tipo)
+                token = Token(i, i+1, num_linha + 1, tipo)
                 tokens.append(token)
             elif char == ';':
                 tipo = Tipo("PONTUACAO", "SEMICOLON")
-                token = Token(i, i+1, num_linha, tipo)
+                token = Token(i, i+1, num_linha + 1, tipo)
                 tokens.append(token)
             elif char == '+':
                 tipo = Tipo("OPERACAO", "PLUS")
-                token = Token(i, i+1, num_linha, tipo)
+                token = Token(i, i+1, num_linha + 1, tipo)
                 tokens.append(token)
             elif char == '*':
                 tipo = Tipo("OPERACAO", "MULT")
-                token = Token(i, i+1, num_linha, tipo)
+                token = Token(i, i+1, num_linha + 1, tipo)
                 tokens.append(token)
             elif char == '/':
                 tipo = Tipo("OPERACAO", "DIV")
-                token = Token(i, i+1, num_linha, tipo)
+                token = Token(i, i+1, num_linha + 1, tipo)
                 tokens.append(token)
 
             # Redireciona para os estados
@@ -104,7 +107,7 @@ for linha in arquivo:
                 if i+1 == len(ibuf):
                     palavra = ''.join(lexema)
                     tipo = Tipo("INT_CONST", int(palavra))
-                    token = Token(inicio, i, num_linha, tipo)
+                    token = Token(inicio, i, num_linha + 1, tipo)
                     tokens.append(token)
                     lexema = []
                 else:
@@ -114,7 +117,7 @@ for linha in arquivo:
                 lexema.append(char)
                 if i+1 == len(ibuf):
                     tipo = Tipo("IDENTIFICADOR", ''.join(lexema))
-                    token = Token(inicio, i+1, num_linha, tipo)
+                    token = Token(inicio, i+1, num_linha + 1, tipo)
                     tokens.append(token)
                     lexema = [] 
                 else:
@@ -132,19 +135,19 @@ for linha in arquivo:
         elif estado == 1:
             if char == '=':
                 tipo = Tipo("OPERACAO", "EQ")
-                token = Token(i-1, i+1, num_linha, tipo)
+                token = Token(i-1, i+1, num_linha + 1, tipo)
                 tokens.append(token)
+                i += 1
             else:
                 tipo = Tipo("OPERACAO", "ASSIGN")
-                token = Token(i-1, i, num_linha, tipo)
+                token = Token(i-1, i, num_linha + 1, tipo)
                 tokens.append(token)
-            i += 1
             estado = 0
 
         elif estado == 2:
             if char == '=':
                 tipo = Tipo("OPERACAO", "NE")
-                token = Token(i-1, i+1, num_linha, tipo)
+                token = Token(i-1, i+1, num_linha + 1, tipo)
                 tokens.append(token)
                 i += 1
                 estado = 0
@@ -154,37 +157,37 @@ for linha in arquivo:
         elif estado == 3:
             if char == '=':
                 tipo = Tipo("OPERACAO", "GE")
-                token = Token(i-1, i+1, num_linha, tipo)
+                token = Token(i-1, i+1, num_linha + 1, tipo)
                 tokens.append(token)
+                i += 1
             else:
                 tipo = Tipo("OPERACAO", "GT")
-                token = Token(i-1, i, num_linha, tipo)
+                token = Token(i-1, i, num_linha + 1, tipo)
                 tokens.append(token)
-            i += 1
             estado = 0
 
         elif estado == 4:
             if char == '=':
                 tipo = Tipo("OPERACAO", "LE")
-                token = Token(i-1, i+1, num_linha, tipo)
+                token = Token(i-1, i+1, num_linha + 1, tipo)
                 tokens.append(token)
+                i += 1
             else:
                 tipo = Tipo("OPERACAO", "LT")
-                token = Token(i-1, i, num_linha, tipo)
+                token = Token(i-1, i, num_linha + 1, tipo)
                 tokens.append(token)
-            i += 1
             estado = 0
         
         elif estado == 5:
             if char == '>':
                 tipo = Tipo("OPERACAO", "ARROW")
-                token = Token(i-1, i+1, num_linha, tipo)
+                token = Token(i-1, i+1, num_linha + 1, tipo)
                 tokens.append(token)
+                i += 1
             else:
                 tipo = Tipo("OPERACAO", "MINUS")
-                token = Token(i-1, i, num_linha, tipo)
+                token = Token(i-1, i, num_linha + 1, tipo)
                 tokens.append(token)
-            i += 1
             estado = 0
         
         elif estado == 6:
@@ -200,7 +203,7 @@ for linha in arquivo:
             else:
                 palavra = ''.join(lexema)
                 tipo = Tipo("INT_CONST", int(palavra))
-                token = Token(inicio, i, num_linha, tipo)
+                token = Token(inicio, i, num_linha + 1, tipo)
                 tokens.append(token)
                 estado = 0
                 lexema = []
@@ -222,7 +225,7 @@ for linha in arquivo:
             else:
                 palavra = ''.join(lexema)
                 tipo = Tipo("FLOAT_CONST", float(palavra))
-                token = Token(inicio, i, num_linha, tipo)
+                token = Token(inicio, i, num_linha + 1, tipo)
                 tokens.append(token)
                 estado = 0
                 lexema = []
@@ -259,7 +262,7 @@ for linha in arquivo:
                     tipo = Tipo("PALAVRAS_RESERVADAS", "RETURN")
                 else:
                     tipo = Tipo("IDENTIFICADOR", palavra)
-                token = Token(inicio, i, num_linha, tipo)
+                token = Token(inicio, i, num_linha + 1, tipo)
                 tokens.append(token)
                 estado = 0
                 lexema = []  
@@ -268,8 +271,8 @@ for linha in arquivo:
         elif estado == 10:
             i += 1
             if char == "'":
-                tipo = Tipo("CARACTER_LITERAL", '')
-                token = Token(inicio, i, num_linha, tipo)
+                tipo = Tipo("CHAR_LITERAL", '')
+                token = Token(inicio, i, num_linha + 1, tipo)
                 tokens.append(token)
                 i += 1
                 estado = 0
@@ -279,8 +282,8 @@ for linha in arquivo:
 
         elif estado == 11:
             if char == "'":
-                tipo = Tipo("CARACTER_LITERAL", ''.join(lexema))
-                token = Token(inicio, i, num_linha, tipo)
+                tipo = Tipo("CHAR_LITERAL", ''.join(lexema))
+                token = Token(inicio, i, num_linha + 1, tipo)
                 tokens.append(token)
                 i += 1
                 estado = 0
@@ -294,7 +297,7 @@ for linha in arquivo:
             i += 1
             if char == '"':
                 tipo = Tipo("FMT_STRING", "")
-                token = Token(inicio, i, num_linha, tipo)
+                token = Token(inicio, i, num_linha + 1, tipo)
                 tokens.append(token)
                 i += 1
                 estado = 0
@@ -305,7 +308,7 @@ for linha in arquivo:
         elif estado == 13:
             if char == '"':
                 tipo = Tipo("FMT_STRING", ''.join(lexema))
-                token = Token(inicio, i, num_linha, tipo)
+                token = Token(inicio, i, num_linha + 1, tipo)
                 tokens.append(token)
                 i += 1
                 estado = 0
